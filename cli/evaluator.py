@@ -2,8 +2,7 @@
 
 import asyncio
 import math
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 from .github_client import GitHubClient
 from .models import (
@@ -17,10 +16,10 @@ from .vulnerabilities import run_vulnerability_scan
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
-def _parse_dt(s: Optional[str]) -> Optional[datetime]:
+def _parse_dt(s: str | None) -> datetime | None:
     if not s:
         return None
     try:
@@ -159,9 +158,7 @@ def score_maintenance(repo: dict, releases: list) -> DimensionScore:
         latest = _parse_dt(releases[0].get("published_at") or releases[0].get("created_at"))
         if latest:
             d = (_now() - latest).days
-            release_score = (
-                10.0 if d < 90 else 8.0 if d < 180 else 6.0 if d < 365 else 3.0
-            )
+            release_score = 10.0 if d < 90 else 8.0 if d < 180 else 6.0 if d < 365 else 3.0
     elif days_since < 365:
         release_score = 4.0
 
@@ -178,7 +175,7 @@ def score_maintenance(repo: dict, releases: list) -> DimensionScore:
     )
 
 
-def score_documentation(paths: set[str], readme: Optional[str]) -> DimensionScore:
+def score_documentation(paths: set[str], readme: str | None) -> DimensionScore:
     pts = 0.0
     found: list[str] = []
     if readme:
@@ -194,9 +191,7 @@ def score_documentation(paths: set[str], readme: Optional[str]) -> DimensionScor
             found.append("short README")
         else:
             pts += 0.5
-    if _has_any(
-        paths, ["CONTRIBUTING.md", "CONTRIBUTING.rst", ".github/CONTRIBUTING.md"]
-    ):
+    if _has_any(paths, ["CONTRIBUTING.md", "CONTRIBUTING.rst", ".github/CONTRIBUTING.md"]):
         pts += 1.5
         found.append("CONTRIBUTING")
     if _has_any(paths, ["CHANGELOG.md", "CHANGELOG", "CHANGES.md", "HISTORY.md"]):
@@ -462,6 +457,7 @@ async def evaluate_repo(owner: str, name: str, deep: bool = False) -> Evaluation
     if deep:
         try:
             from .claude_analysis import analyze
+
             report.llm_analysis = analyze(report)
         except Exception as e:
             report.llm_analysis = f"[Claude analysis unavailable: {e}]"

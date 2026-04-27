@@ -2,7 +2,6 @@
 
 import re
 import uuid
-from typing import Optional
 
 from .github_client import GitHubClient
 from .models import VulnerabilityFinding
@@ -23,7 +22,11 @@ SECRET_PATTERNS: list[tuple[str, re.Pattern[str], str]] = [
     ("slack_token", re.compile(r"xox[baprs]-[A-Za-z0-9\-]{10,}"), "high"),
     ("google_api_key", re.compile(r"AIza[0-9A-Za-z_\-]{35}"), "high"),
     ("stripe_live_key", re.compile(r"sk_live_[A-Za-z0-9]{24,}"), "critical"),
-    ("jwt_token", re.compile(r"eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}"), "medium"),
+    (
+        "jwt_token",
+        re.compile(r"eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}"),
+        "medium",
+    ),
 ]
 
 SUSPICIOUS_FILENAMES = {
@@ -149,9 +152,7 @@ def analyze_dependency_hygiene(paths: set[str]) -> list[VulnerabilityFinding]:
             )
         )
 
-    has_py_deps = bool(
-        {"requirements.txt", "setup.py", "pyproject.toml", "pipfile"} & paths_lower
-    )
+    has_py_deps = bool({"requirements.txt", "setup.py", "pyproject.toml", "pipfile"} & paths_lower)
     has_py_lock = bool(
         {"poetry.lock", "pipfile.lock", "uv.lock", "requirements-lock.txt"} & paths_lower
     )
@@ -204,9 +205,7 @@ AI_KEYWORDS = (
 )
 
 
-def detect_ai_llm_risks(
-    paths: set[str], readme: Optional[str]
-) -> list[VulnerabilityFinding]:
+def detect_ai_llm_risks(paths: set[str], readme: str | None) -> list[VulnerabilityFinding]:
     findings: list[VulnerabilityFinding] = []
     text = (readme or "").lower()
     is_ai_repo = any(k in text for k in AI_KEYWORDS)
@@ -257,9 +256,7 @@ def supply_chain_checks(repo: dict, paths: set[str]) -> list[VulnerabilityFindin
                 severity="medium",
                 category="supply_chain",
                 title="Low-star fork",
-                description=(
-                    "This is a fork with few stars; verify why and prefer the upstream."
-                ),
+                description=("This is a fork with few stars; verify why and prefer the upstream."),
             )
         )
     if "package.json" in {p.lower() for p in paths} and not any(
@@ -308,7 +305,7 @@ async def run_vulnerability_scan(
     name: str,
     repo: dict,
     paths: set[str],
-    readme: Optional[str],
+    readme: str | None,
 ) -> list[VulnerabilityFinding]:
     findings: list[VulnerabilityFinding] = []
     findings.extend(scan_suspicious_filenames(paths))

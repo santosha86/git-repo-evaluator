@@ -5,7 +5,6 @@ import json
 import os
 import uuid
 from pathlib import Path
-from typing import Optional
 
 from filelock import FileLock
 
@@ -75,44 +74,43 @@ def save_evaluation(report: EvaluationReport) -> Path:
     detail_path.write_text(report.model_dump_json(indent=2), encoding="utf-8")
 
     eval_csv = base / "evaluations.csv"
-    with FileLock(str(eval_csv) + ".lock"):
-        with eval_csv.open("a", newline="", encoding="utf-8") as f:
-            row: dict = {
-                "eval_id": report.eval_id,
-                "repo_owner": report.repo_owner,
-                "repo_name": report.repo_name,
-                "repo_url": report.repo_url,
-                "evaluated_at": report.evaluated_at.isoformat(),
-                **{
-                    name: f"{report.dimensions[name].score:.2f}"
-                    for name in DIMENSION_WEIGHTS
-                },
-                "final_score": f"{report.final_score:.2f}",
-                "grade": report.grade,
-                "details_path": str(detail_path.relative_to(base)).replace("\\", "/"),
-            }
-            csv.DictWriter(f, fieldnames=EVAL_HEADERS).writerow(row)
+    with (
+        FileLock(str(eval_csv) + ".lock"),
+        eval_csv.open("a", newline="", encoding="utf-8") as f,
+    ):
+        row: dict = {
+            "eval_id": report.eval_id,
+            "repo_owner": report.repo_owner,
+            "repo_name": report.repo_name,
+            "repo_url": report.repo_url,
+            "evaluated_at": report.evaluated_at.isoformat(),
+            **{name: f"{report.dimensions[name].score:.2f}" for name in DIMENSION_WEIGHTS},
+            "final_score": f"{report.final_score:.2f}",
+            "grade": report.grade,
+            "details_path": str(detail_path.relative_to(base)).replace("\\", "/"),
+        }
+        csv.DictWriter(f, fieldnames=EVAL_HEADERS).writerow(row)
 
     if report.vulnerabilities:
         vuln_csv = base / "vulnerabilities.csv"
-        with FileLock(str(vuln_csv) + ".lock"):
-            with vuln_csv.open("a", newline="", encoding="utf-8") as f:
-                w = csv.DictWriter(f, fieldnames=VULN_HEADERS)
-                for v in report.vulnerabilities:
-                    w.writerow(
-                        {
-                            "eval_id": report.eval_id,
-                            "finding_id": v.finding_id,
-                            "severity": v.severity,
-                            "category": v.category,
-                            "title": v.title,
-                            "file": v.file or "",
-                            "line": v.line if v.line is not None else "",
-                            "description": (v.description or "")
-                            .replace("\n", " ")
-                            .replace("\r", " "),
-                        }
-                    )
+        with (
+            FileLock(str(vuln_csv) + ".lock"),
+            vuln_csv.open("a", newline="", encoding="utf-8") as f,
+        ):
+            w = csv.DictWriter(f, fieldnames=VULN_HEADERS)
+            for v in report.vulnerabilities:
+                w.writerow(
+                    {
+                        "eval_id": report.eval_id,
+                        "finding_id": v.finding_id,
+                        "severity": v.severity,
+                        "category": v.category,
+                        "title": v.title,
+                        "file": v.file or "",
+                        "line": v.line if v.line is not None else "",
+                        "description": (v.description or "").replace("\n", " ").replace("\r", " "),
+                    }
+                )
 
     _upsert_repo(report)
     return detail_path
@@ -179,7 +177,7 @@ def load_repo_history(owner: str, name: str) -> list[dict]:
         ]
 
 
-def load_detail(eval_id: str) -> Optional[dict]:
+def load_detail(eval_id: str) -> dict | None:
     path = _data_dir() / "details" / f"{eval_id}.json"
     if not path.exists():
         return None

@@ -1,7 +1,7 @@
 """Pydantic data models shared by CLI, storage, and API layers."""
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -48,8 +48,8 @@ class VulnerabilityFinding(BaseModel):
     category: str  # "secret" | "dependency" | "ai_risk" | "supply_chain" | "git_history"
     title: str
     description: str
-    file: Optional[str] = None
-    line: Optional[int] = None
+    file: str | None = None
+    line: int | None = None
 
 
 class EvaluationReport(BaseModel):
@@ -62,7 +62,7 @@ class EvaluationReport(BaseModel):
     final_score: float
     grade: str
     vulnerabilities: list[VulnerabilityFinding] = Field(default_factory=list)
-    llm_analysis: Optional[str] = None
+    llm_analysis: str | None = None
 
 
 def grade_for(score: float) -> str:

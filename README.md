@@ -8,7 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6.svg)](https://www.typescriptlang.org/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38BDF8.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-19%2F19_passing-success.svg)](#testing)
+[![Tests](https://github.com/santosha86/git-repo-evaluator/actions/workflows/test.yml/badge.svg)](https://github.com/santosha86/git-repo-evaluator/actions/workflows/test.yml)
 
 A local-first **CLI + web dashboard** that grades any public GitHub repository on a 0-10 scale across **10 weighted dimensions** and runs a **vulnerability scan** for leaked secrets, dependency hygiene issues, AI/LLM risks, and supply-chain red flags. Optional `--deep` mode adds a Claude-generated qualitative review.
 

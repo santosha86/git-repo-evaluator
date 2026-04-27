@@ -2,7 +2,6 @@
 
 import asyncio
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -106,9 +105,7 @@ def cli() -> None:
 )
 @click.option("--output", type=click.Path(dir_okay=False), help="Write output to file.")
 @click.option("--no-save", is_flag=True, help="Do not persist this evaluation to CSV.")
-def evaluate(
-    repo_arg: str, deep: bool, fmt: str, output: Optional[str], no_save: bool
-) -> None:
+def evaluate(repo_arg: str, deep: bool, fmt: str, output: str | None, no_save: bool) -> None:
     """Evaluate a GitHub repo. REPO_ARG is owner/name or a full GitHub URL."""
     owner, name = _parse_repo(repo_arg)
     console.print(f"[cyan]-> Evaluating[/cyan] [bold]{owner}/{name}[/bold] ...")
@@ -189,9 +186,7 @@ def batch(file: str, output: str) -> None:
             console.print(f"[cyan]->[/cyan] {owner}/{name}")
             report = asyncio.run(evaluate_repo(owner, name))
             save_evaluation(report)
-            (Path(output) / f"{owner}__{name}.md").write_text(
-                _md_report(report), encoding="utf-8"
-            )
+            (Path(output) / f"{owner}__{name}.md").write_text(_md_report(report), encoding="utf-8")
         except Exception as e:
             console.print(f"  [red]error:[/red] {e}")
 

@@ -4,7 +4,6 @@ Invoked when the user passes --deep and ANTHROPIC_API_KEY is set.
 """
 
 import os
-from typing import Optional
 
 from .models import EvaluationReport
 
@@ -47,20 +46,22 @@ def _format_report_for_prompt(report: EvaluationReport) -> str:
     ]
     for name, dim in report.dimensions.items():
         ev = "; ".join(dim.evidence) if dim.evidence else "—"
-        lines.append(
-            f"- **{name}** {dim.score:.2f}/10 (weight {dim.weight*100:.0f}%): {ev}"
-        )
+        lines.append(f"- **{name}** {dim.score:.2f}/10 (weight {dim.weight*100:.0f}%): {ev}")
     if report.vulnerabilities:
         lines += ["", f"## Vulnerability findings ({len(report.vulnerabilities)})"]
         for v in report.vulnerabilities:
-            loc = f" at {v.file}:{v.line}" if v.file and v.line else (f" ({v.file})" if v.file else "")
+            loc = (
+                f" at {v.file}:{v.line}"
+                if v.file and v.line
+                else (f" ({v.file})" if v.file else "")
+            )
             lines.append(f"- [{v.severity}] [{v.category}] {v.title}{loc} — {v.description}")
     else:
         lines += ["", "## Vulnerability findings: none detected by automated scan"]
     return "\n".join(lines)
 
 
-def analyze(report: EvaluationReport) -> Optional[str]:
+def analyze(report: EvaluationReport) -> str | None:
     """Call Claude for a qualitative take on the report.
 
     Returns None if ANTHROPIC_API_KEY is not set. Raises on API errors.

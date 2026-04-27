@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from cli.models import DIMENSION_WEIGHTS, DimensionScore, EvaluationReport, grade_for
 from cli.storage import load_recent, load_repo_history, save_evaluation
@@ -19,7 +19,7 @@ def _make_report(
         repo_owner=owner,
         repo_name=name,
         repo_url=f"https://github.com/{owner}/{name}",
-        evaluated_at=datetime.now(timezone.utc),
+        evaluated_at=datetime.now(UTC),
         dimensions=dims,
         final_score=score,
         grade=grade_for(score),

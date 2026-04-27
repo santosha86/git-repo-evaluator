@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 
@@ -20,7 +20,7 @@ def _seed(tmp_path, monkeypatch) -> EvaluationReport:
         repo_owner="acme",
         repo_name="widget",
         repo_url="https://github.com/acme/widget",
-        evaluated_at=datetime.now(timezone.utc),
+        evaluated_at=datetime.now(UTC),
         dimensions=dims,
         final_score=7.5,
         grade=grade_for(7.5),

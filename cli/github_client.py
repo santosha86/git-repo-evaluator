@@ -3,8 +3,8 @@
 import asyncio
 import base64
 import os
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 
@@ -16,7 +16,7 @@ class GitHubError(RuntimeError):
 
 
 class GitHubClient:
-    def __init__(self, token: Optional[str] = None, timeout: float = 30.0) -> None:
+    def __init__(self, token: str | None = None, timeout: float = 30.0) -> None:
         self.token = token if token is not None else (os.getenv("GITHUB_TOKEN") or None)
         headers = {
             "Accept": "application/vnd.github+json",
@@ -44,7 +44,7 @@ class GitHubClient:
     async def _get(
         self,
         path: str,
-        params: Optional[dict] = None,
+        params: dict | None = None,
         max_retries: int = 3,
         tolerate: tuple[int, ...] = (),
     ) -> Any:
@@ -57,12 +57,10 @@ class GitHubClient:
             remaining = r.headers.get("x-ratelimit-remaining")
             if r.status_code == 403 and remaining == "0":
                 reset = int(r.headers.get("x-ratelimit-reset", "0"))
-                wait = max(reset - int(datetime.now(tz=timezone.utc).timestamp()), 1)
+                wait = max(reset - int(datetime.now(tz=UTC).timestamp()), 1)
                 if wait > 120:
                     hint = "" if self.token else " Set GITHUB_TOKEN to raise the limit."
-                    raise GitHubError(
-                        f"GitHub rate limit exhausted; resets in {wait}s.{hint}"
-                    )
+                    raise GitHubError(f"GitHub rate limit exhausted; resets in {wait}s.{hint}")
                 await asyncio.sleep(wait + 1)
                 continue
             if r.status_code in (502, 503, 504):
@@ -77,14 +75,12 @@ class GitHubClient:
             raise GitHubError(f"Repo not found: {owner}/{repo}")
         return data
 
-    async def list_commits(self, owner: str, repo: str, since: Optional[str] = None) -> list:
+    async def list_commits(self, owner: str, repo: str, since: str | None = None) -> list:
         params: dict = {"per_page": 100}
         if since:
             params["since"] = since
         return (
-            await self._get(
-                f"/repos/{owner}/{repo}/commits", params=params, tolerate=(404, 409)
-            )
+            await self._get(f"/repos/{owner}/{repo}/commits", params=params, tolerate=(404, 409))
             or []
         )
 
@@ -128,7 +124,7 @@ class GitHubClient:
             return []
         return data.get("tree", [])
 
-    async def get_readme(self, owner: str, repo: str) -> Optional[str]:
+    async def get_readme(self, owner: str, repo: str) -> str | None:
         data = await self._get(f"/repos/{owner}/{repo}/readme", tolerate=(404,))
         if not data:
             return None
@@ -139,11 +135,9 @@ class GitHubClient:
 
     async def get_file_content(
         self, owner: str, repo: str, path: str, max_bytes: int = 200_000
-    ) -> Optional[str]:
+    ) -> str | None:
         """Fetch a single file's text content. Returns None for dirs, binaries, or >max_bytes."""
-        data = await self._get(
-            f"/repos/{owner}/{repo}/contents/{path}", tolerate=(404, 403)
-        )
+        data = await self._get(f"/repos/{owner}/{repo}/contents/{path}", tolerate=(404, 403))
         if not data or isinstance(data, list):
             return None
         if data.get("encoding") != "base64":
