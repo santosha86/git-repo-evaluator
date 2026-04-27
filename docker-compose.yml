@@ -1,0 +1,25 @@
+services:
+  api:
+    build: .
+    container_name: gre-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./cli:/app/cli
+      - ./api:/app/api
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  dashboard:
+    image: node:20-alpine
+    container_name: gre-dashboard
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./dashboard:/app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - api

@@ -1,0 +1,4 @@
+eval_id,repo_owner,repo_name,repo_url,evaluated_at,popularity,momentum,community,maintenance,documentation,code_quality,security,licensing,architecture,real_world_value,final_score,grade,details_path
+918543f398d7,santifer,career-ops,https://github.com/santifer/career-ops,2026-04-17T20:56:04.341617+00:00,8.85,10.00,4.27,10.00,10.00,5.00,10.00,10.00,4.00,10.00,8.51,A,details/918543f398d7.json
+a9307772562f,santifer,career-ops,https://github.com/santifer/career-ops,2026-04-17T20:56:14.047688+00:00,8.85,10.00,4.27,10.00,10.00,5.00,10.00,10.00,4.00,10.00,8.51,A,details/a9307772562f.json
+664ff9ecf3bd,nousresearch,hermes-agent,https://github.com/NousResearch/hermes-agent,2026-04-19T17:41:19.635844+00:00,9.65,10.00,5.59,10.00,7.50,10.00,8.00,10.00,5.50,10.00,8.75,A,details/664ff9ecf3bd.json

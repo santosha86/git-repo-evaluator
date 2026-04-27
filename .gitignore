@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node / Dashboard
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.vite/
+*.tsbuildinfo
+*.log
+
+# Env & secrets
+.env
+.env.local
+*.pem
+
+# Data (keep schema, ignore generated content)
+data/details/*.json
+!data/details/.gitkeep
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

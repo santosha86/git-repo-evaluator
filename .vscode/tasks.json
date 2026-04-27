@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "make: dev",
+      "type": "shell",
+      "command": "make dev",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "make: test",
+      "type": "shell",
+      "command": "make test",
+      "problemMatcher": [],
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "make: lint",
+      "type": "shell",
+      "command": "make lint",
+      "problemMatcher": []
+    },
+    {
+      "label": "evaluate (prompt for repo)",
+      "type": "shell",
+      "command": "python -m cli.main evaluate ${input:repo}",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "repo",
+      "type": "promptString",
+      "description": "owner/repo to evaluate",
+      "default": "facebook/react"
+    }
+  ]
+}

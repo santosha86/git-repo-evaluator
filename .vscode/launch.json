@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "CLI: evaluate",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "cli.main",
+      "args": ["evaluate", "facebook/react"],
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "API: FastAPI (uvicorn reload)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "api.main:app",
+        "--reload",
+        "--host", "127.0.0.1",
+        "--port", "8000"
+      ],
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Dashboard: Vite dev",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack",
+      "configurations": ["API: FastAPI (uvicorn reload)", "Dashboard: Vite dev"],
+      "stopAll": true
+    }
+  ]
+}
